@@ -18,6 +18,10 @@ import com.google.android.material.navigation.NavigationView
 import com.example.modoocommonsense.cardstackview.*
 import com.yuyakaido.android.cardstackview.sample.CardStackAdapter
 import java.util.*
+import java.sql.Connection
+import java.sql.DriverManager
+import java.sql.SQLException
+import java.sql.Statement
 
 class MainActivity : AppCompatActivity(), CardStackListener {
 
@@ -105,6 +109,8 @@ class MainActivity : AppCompatActivity(), CardStackListener {
     private fun setupButton() {
         val skip = findViewById<View>(R.id.skip_button)
         skip.setOnClickListener {
+            Log.d("CardStackView", "onSkipButtonClicked")
+
             val setting = SwipeAnimationSetting.Builder()
                     .setDirection(Direction.Left)
                     .setDuration(Duration.Normal.duration)
@@ -116,6 +122,8 @@ class MainActivity : AppCompatActivity(), CardStackListener {
 
         val rewind = findViewById<View>(R.id.rewind_button)
         rewind.setOnClickListener {
+            Log.d("CardStackView", "onRewindButtonClicked")
+
             val setting = RewindAnimationSetting.Builder()
                     .setDirection(Direction.Bottom)
                     .setDuration(Duration.Normal.duration)
@@ -127,6 +135,8 @@ class MainActivity : AppCompatActivity(), CardStackListener {
 
         val like = findViewById<View>(R.id.like_button)
         like.setOnClickListener {
+            Log.d("CardStackView", "onLikeButtonClicked")
+
             val setting = SwipeAnimationSetting.Builder()
                     .setDirection(Direction.Right)
                     .setDuration(Duration.Normal.duration)
@@ -273,18 +283,42 @@ class MainActivity : AppCompatActivity(), CardStackListener {
     }
 
     private fun createSpots(): List<Spot> {
-        val spots = ArrayList<Spot>()
-        spots.add(Spot(name = "Yasaka Shrine", city = "Kyoto", url = "https://source.unsplash.com/Xq1ntWruZQI/600x800"))
-        spots.add(Spot(name = "Fushimi Inari Shrine", city = "Kyoto", url = "https://source.unsplash.com/NYyCqdBOKwc/600x800"))
-        spots.add(Spot(name = "Bamboo Forest", city = "Kyoto", url = "https://source.unsplash.com/buF62ewDLcQ/600x800"))
-        spots.add(Spot(name = "Brooklyn Bridge", city = "New York", url = "https://source.unsplash.com/THozNzxEP3g/600x800"))
-        spots.add(Spot(name = "Empire State Building", city = "New York", url = "https://source.unsplash.com/USrZRcRS2Lw/600x800"))
-        spots.add(Spot(name = "The statue of Liberty", city = "New York", url = "https://source.unsplash.com/PeFk7fzxTdk/600x800"))
-        spots.add(Spot(name = "Louvre Museum", city = "Paris", url = "https://source.unsplash.com/LrMWHKqilUw/600x800"))
-        spots.add(Spot(name = "Eiffel Tower", city = "Paris", url = "https://source.unsplash.com/HN-5Z6AmxrM/600x800"))
-        spots.add(Spot(name = "Big Ben", city = "London", url = "https://source.unsplash.com/CdVAUADdqEc/600x800"))
-        spots.add(Spot(name = "Great Wall of China", city = "China", url = "https://source.unsplash.com/AWh9C-QjhE4/600x800"))
-        return spots
-    }
+        val url = "jdbc:postgresql://localhost:5432/commonsense"
+        val user = "simon"
+        val password = "dkahflg1"
 
+        try {
+            val connection: Connection = DriverManager.getConnection(url, user, password)
+
+            // Create a statement
+            val statement: Statement = connection.createStatement()
+
+            // Execute a query
+            // TODO: check url, user, password
+            // TODO: test query first
+            val resultSet = statement.executeQuery("SELECT title, context FROM Items LIMIT 100")
+            val spots = ArrayList<Spot>()
+
+            // Process the result set
+            while (resultSet.next()) {
+                val titleValue = resultSet.getString("title")
+                val contextValue = resultSet.getString("context")
+
+                // Process the values...
+
+                println("titleValue: $titleValue, contextValue: $contextValue")
+                spots.add(Spot(name = titleValue, city = contextValue, url = "https://source.unsplash.com/Xq1ntWruZQI/600x800"))
+            }
+
+            // Close the connection when done
+            // Close resources
+            resultSet.close()
+            statement.close()
+            connection.close()
+
+            return spots
+        } catch (e: SQLException) {
+            e.printStackTrace()
+        }
+    }
 }

@@ -39,6 +39,9 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.13.2'
     kapt 'com.github.bumptech.glide:compiler:4.13.2'
 
+    // Connect to DB
+    implementation 'org.postgresql:postgresql:42.2.23'
+
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.appcompat:appcompat:1.0.0'

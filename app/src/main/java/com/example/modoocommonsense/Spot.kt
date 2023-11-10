@@ -1,5 +1,6 @@
 package com.example.modoocommonsense
 
+// TODO: rename to CommonSense
 data class Spot(
     val id: Long = counter++,
     val name: String,
