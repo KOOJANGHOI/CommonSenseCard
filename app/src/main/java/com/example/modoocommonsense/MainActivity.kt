@@ -283,31 +283,29 @@ class MainActivity : AppCompatActivity(), CardStackListener {
     }
 
     private fun createSpots(): List<Spot> {
-        val url = "jdbc:postgresql://localhost:5432/commonsense"
-        val user = "simon"
-        val password = "dkahflg1"
+        val url = "jdbc:postgresql://localhost/commonsense?user=simon&password=1234&ssl=true"
+
+        val spots = ArrayList<Spot>()
 
         try {
-            val connection: Connection = DriverManager.getConnection(url, user, password)
-
+            val connection: Connection = DriverManager.getConnection(url)
             // Create a statement
             val statement: Statement = connection.createStatement()
 
             // Execute a query
-            // TODO: check url, user, password
-            // TODO: test query first
-            val resultSet = statement.executeQuery("SELECT title, context FROM Items LIMIT 100")
-            val spots = ArrayList<Spot>()
+            // TODO: (11/16) check url, user, password and test query first
+            // TODO: (11/17) no, server implementation next todos..
+            val resultSet = statement.executeQuery("SELECT i.title AS title, i.contents AS contents FROM 'Items' i LIMIT 100;")
 
             // Process the result set
             while (resultSet.next()) {
                 val titleValue = resultSet.getString("title")
-                val contextValue = resultSet.getString("context")
+                val contentsValue = resultSet.getString("contents")
 
                 // Process the values...
 
-                println("titleValue: $titleValue, contextValue: $contextValue")
-                spots.add(Spot(name = titleValue, city = contextValue, url = "https://source.unsplash.com/Xq1ntWruZQI/600x800"))
+                Log.d("CardStackView", "titleValue: $titleValue, contentsValue: $contentsValue")
+                spots.add(Spot(name = titleValue, city = contentsValue, url = "https://source.unsplash.com/Xq1ntWruZQI/600x800"))
             }
 
             // Close the connection when done
@@ -315,10 +313,12 @@ class MainActivity : AppCompatActivity(), CardStackListener {
             resultSet.close()
             statement.close()
             connection.close()
-
-            return spots
+        } catch (e: ClassNotFoundException) {
+            e.printStackTrace()
         } catch (e: SQLException) {
             e.printStackTrace()
         }
+
+        return spots
     }
 }
