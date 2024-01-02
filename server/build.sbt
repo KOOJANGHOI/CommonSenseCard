@@ -24,6 +24,7 @@ libraryDependencies ++= {
     // 데이터베이스와 상호작용하기 위해 Play Slick 또는 Play Anorm과 같은 라이브러리를 추가합니다. build.sbt 파일에 다음과 같이 의존성을 추가할 수 있습니다.
     /* Scala Libraries */
     "com.typesafe.play" %% "play-json" % playJsonVersion,
+    "com.typesafe.play" %% "play-ws" % playJsonVersion,
     "com.typesafe.slick" %% "slick" % slickVersion,
     "com.typesafe.slick" %% "slick-hikaricp" % slickVersion,
     "com.github.tminglei" %% "slick-pg" % slickPgVersion,
@@ -36,5 +37,8 @@ libraryDependencies ++= {
 
     /* Database Libraries */
     "org.postgresql" % "postgresql" % postgresqlVersion,
+
+    /* Logging */
+    "ch.qos.logback" % "logback-classic" % "1.2.3"
   )
 }

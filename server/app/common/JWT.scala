@@ -76,7 +76,7 @@ object JWTClaim {
 object JWT {
   import scala.reflect._
 
-  private lazy val logger = Logger("jwt")
+  private lazy val logger = Logger("util.jwt")
   private lazy val jwtSecretKey = Keys.hmacShaKeyFor(Config.JwtSecret.getBytes(StandardCharsets.UTF_8))
   private lazy val jwtParser = Jwts.parserBuilder()
     .setSigningKey(jwtSecretKey)

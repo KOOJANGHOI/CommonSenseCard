@@ -15,7 +15,7 @@ object CommonSenseCookieKey extends Enumeration {
 }
 
 object Util {
-  private val logger = Logger("common.util")
+  private val logger = Logger("util.util")
 
   /* APP CONSTANTS */
 

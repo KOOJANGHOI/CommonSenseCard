@@ -8,7 +8,6 @@ import db.Tables.items
 import db.query.api.core.BasicStreamingActionExt
 
 object item {
-  // TODO(simon): remove after test
   case class FetchItems(item_ids: Seq[Int]) extends db.Query[Seq[Item]] {
     protected def prepare(implicit ec: DBExecutionContext) =
       items

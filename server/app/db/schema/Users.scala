@@ -25,7 +25,7 @@ object User {
 
 class Users(tag: Tag) extends TableLike[User](tag, "Users") {
   def user_id = column[Int]("user_id", O.PrimaryKey, O.AutoInc)
-  def device_uuid = column[String]("title")
+  def device_uuid = column[String]("device_uuid")
   def created_at = column[ZonedDateTime]("created_at")
   def last_login_at = column[ZonedDateTime]("last_login_at")
   def bookmark_item_ids = column[Seq[Int]]("bookmark_item_ids")

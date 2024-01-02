@@ -16,12 +16,21 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.DiffUtil
 import com.google.android.material.navigation.NavigationView
 import com.example.modoocommonsense.cardstackview.*
+import com.example.modoocommonsense.cardstackview.service.ApiService
+import com.example.modoocommonsense.cardstackview.service.ItemResponse
+import com.example.modoocommonsense.cardstackview.service.RatingBody
+import com.example.modoocommonsense.cardstackview.service.RatingResponse
+import com.example.modoocommonsense.cardstackview.service.UserResponse
+import com.example.modoocommonsense.cardstackview.service.UserSaveDatum
+import com.google.gson.GsonBuilder
 import com.yuyakaido.android.cardstackview.sample.CardStackAdapter
 import java.util.*
-import java.sql.Connection
-import java.sql.DriverManager
-import java.sql.SQLException
-import java.sql.Statement
+
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class MainActivity : AppCompatActivity(), CardStackListener {
 
@@ -282,43 +291,150 @@ class MainActivity : AppCompatActivity(), CardStackListener {
         )
     }
 
-    private fun createSpots(): List<Spot> {
-        val url = "jdbc:postgresql://localhost/commonsense?user=simon&password=1234&ssl=true"
+    private val url = "http://172.20.10.7:9000" // You need to use ip 10.0.2.2, which is bridged to your local machine. 127.0.0.1 refers to the emulator itself - not your local machine.
+    private val device_uuid = "DEVICE_UUID";
+    private val user_id = 1;
+    private val item_id = 10000;
+    private val rating = 5;
 
-        val spots = ArrayList<Spot>()
+    // TODO(deploy): Refactor all api call
+    // TODO(impl): Nested api call
+    private fun testGetItem() {
+        // Create Retrofit Instance
+        val gson = GsonBuilder().setLenient().create()
 
-        try {
-            val connection: Connection = DriverManager.getConnection(url)
-            // Create a statement
-            val statement: Statement = connection.createStatement()
+        val retrofit = Retrofit.Builder()
+            .baseUrl(url)
+            .addConverterFactory(GsonConverterFactory.create(gson))
+            .build()
 
-            // Execute a query
-            // TODO: (11/16) check url, user, password and test query first
-            // TODO: (11/17) no, server implementation next todos..
-            val resultSet = statement.executeQuery("SELECT i.title AS title, i.contents AS contents FROM 'Items' i LIMIT 100;")
+        val apiService = retrofit.create(ApiService::class.java)
 
-            // Process the result set
-            while (resultSet.next()) {
-                val titleValue = resultSet.getString("title")
-                val contentsValue = resultSet.getString("contents")
+        // Use Retrofit to Make API Calls:
+        val itemResponseCall = apiService.getData(item_id)
 
-                // Process the values...
-
-                Log.d("CardStackView", "titleValue: $titleValue, contentsValue: $contentsValue")
-                spots.add(Spot(name = titleValue, city = contentsValue, url = "https://source.unsplash.com/Xq1ntWruZQI/600x800"))
+        itemResponseCall.enqueue(object : Callback<ItemResponse> {
+            override fun onResponse(call: Call<ItemResponse>, response: Response<ItemResponse>) {
+                if (response.isSuccessful) {
+                    val itemResponse = response.body()
+                    val item = itemResponse?.item
+                    if (item != null) {
+                        println("Item ID: ${item.item_id}")
+                        println("Title: ${item.title}")
+                        println("Contents: ${item.contents}")
+                    } else {
+                        println("Item is null")
+                    }
+                } else {
+                    println("Error: ${response.code()}")
+                }
             }
 
-            // Close the connection when done
-            // Close resources
-            resultSet.close()
-            statement.close()
-            connection.close()
-        } catch (e: ClassNotFoundException) {
-            e.printStackTrace()
-        } catch (e: SQLException) {
-            e.printStackTrace()
-        }
+            override fun onFailure(call: Call<ItemResponse>, t: Throwable) {
+                // Handle failure
+                Log.d("CardStackView", "================================Network Error: ${t.message}================================", t)
+            }
+        })
+    }
 
+    private fun testPostLogin() {
+        // Create Retrofit Instance
+        val gson = GsonBuilder().setLenient().create()
+
+        val retrofit = Retrofit.Builder()
+            .baseUrl(url)
+            .addConverterFactory(GsonConverterFactory.create(gson))
+            .build()
+
+        val apiService = retrofit.create(ApiService::class.java)
+
+        // Use Retrofit to Make API Calls:
+        val userResponseCall = apiService.POSTLogin(UserSaveDatum(device_uuid, emptyList()))
+
+        userResponseCall.enqueue(object : Callback<UserResponse> {
+            override fun onResponse(call: Call<UserResponse>, response: Response<UserResponse>) {
+                if (response.isSuccessful) {
+                    val userResponse = response.body()
+                    val user = userResponse?.user
+                    if (user != null) {
+                        println("userId: ${user.user_id}")
+                        println("deviceUUID: ${user.device_uuid}")
+                        println("createdAt: ${user.created_at}")
+                        println("lastLoginAt: ${user.last_login_at}")
+                        println("bookmarkItemIds: ${user.bookmark_item_ids}")
+                    } else {
+                        println("user is null")
+                    }
+                } else {
+                    println("Error: ${response.code()}")
+                }
+            }
+
+            override fun onFailure(call: Call<UserResponse>, t: Throwable) {
+                // Handle failure
+                Log.d("CardStackView", "================================Network Error: ${t.message}================================", t)
+            }
+        })
+    }
+
+    private fun testPatchRating() {
+        // Create Retrofit Instance
+        val gson = GsonBuilder().setLenient().create()
+
+        val retrofit = Retrofit.Builder()
+            .baseUrl(url)
+            .addConverterFactory(GsonConverterFactory.create(gson))
+            .build()
+
+        val apiService = retrofit.create(ApiService::class.java)
+
+        Log.d("CardStackView.testPatchRating", "================================{1}================================")
+
+        // Use Retrofit to Make API Calls:
+        val ratingResponseCall = apiService.PATCHRating(user_id, RatingBody(item_id, rating))
+        Log.d("CardStackView.testPatchRating", "================================{2}================================")
+
+        ratingResponseCall.enqueue(object : Callback<RatingResponse> {
+            override fun onResponse(call: Call<RatingResponse>, response: Response<RatingResponse>) {
+                Log.d("CardStackView.testPatchRating", "================================{3}================================")
+
+                if (response.isSuccessful) {
+                    val ratingResponse = response.body()
+                    val rating = ratingResponse?.rating
+                    if (rating != null) {
+                        println("user_id: ${rating.user_id}")
+                        println("item_id: ${rating.item_id}")
+                        println("rating: ${rating.rating}")
+                        println("rated: ${rating.rated}")
+                    } else {
+                        println("user is null")
+                    }
+                } else {
+                    println("Error: ${response.code()}")
+                }
+            }
+
+            override fun onFailure(call: Call<RatingResponse>, t: Throwable) {
+                // Handle failure
+                Log.d("CardStackView", "================================Network Error: ${t.message}================================", t)
+            }
+        })
+    }
+
+    private fun createSpots(): List<Spot> {
+        testPatchRating()
+
+        val spots = ArrayList<Spot>()
+        spots.add(Spot(name = "Yasaka Shrine", city = "Kyoto", url = "https://source.unsplash.com/Xq1ntWruZQI/600x800"))
+        spots.add(Spot(name = "Fushimi Inari Shrine", city = "Kyoto", url = "https://source.unsplash.com/NYyCqdBOKwc/600x800"))
+        spots.add(Spot(name = "Bamboo Forest", city = "Kyoto", url = "https://source.unsplash.com/buF62ewDLcQ/600x800"))
+        spots.add(Spot(name = "Brooklyn Bridge", city = "New York", url = "https://source.unsplash.com/THozNzxEP3g/600x800"))
+        spots.add(Spot(name = "Empire State Building", city = "New York", url = "https://source.unsplash.com/USrZRcRS2Lw/600x800"))
+        spots.add(Spot(name = "The statue of Liberty", city = "New York", url = "https://source.unsplash.com/PeFk7fzxTdk/600x800"))
+        spots.add(Spot(name = "Louvre Museum", city = "Paris", url = "https://source.unsplash.com/LrMWHKqilUw/600x800"))
+        spots.add(Spot(name = "Eiffel Tower", city = "Paris", url = "https://source.unsplash.com/HN-5Z6AmxrM/600x800"))
+        spots.add(Spot(name = "Big Ben", city = "London", url = "https://source.unsplash.com/CdVAUADdqEc/600x800"))
+        spots.add(Spot(name = "Great Wall of China", city = "China", url = "https://source.unsplash.com/AWh9C-QjhE4/600x800"))
         return spots
     }
 }

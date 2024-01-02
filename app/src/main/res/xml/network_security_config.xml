@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- // Todo(prod): allowing cleartext traffic reduces the security of your app, and it's not recommended for production. -->
+<!-- // Todo(prod): It's a temporary solution for development or testing. Always prefer using HTTPS in production environments to ensure secure communication between your app and the server.-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <!-- Trust preinstalled CAs -->
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

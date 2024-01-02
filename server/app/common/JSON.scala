@@ -26,7 +26,7 @@ class ExtractJson(val jsValue: JsValue) {
 }
 
 object JSON {
-  private val logger = Logger("common.json")
+  private val logger = Logger("util.json")
 
   def backwardCompatibleReads[A](f: ExtractJson => A): Reads[A] = {
     Reads { json =>

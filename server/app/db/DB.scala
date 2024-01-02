@@ -56,8 +56,6 @@ trait Query[A] extends QueryLike {
         // override unknown db exception from db with custom AppError
         case Some(dbException) =>
           logger.error(s"Unknown DB Exception(${getClass.getName}): ${Throwables.getStackTraceAsString(dbException)}")
-          // TODO: BUG: https://issues.scala-lang.org/browse/SI-2034 https://issues.scala-lang.org/browse/SI-5425
-          // TODO: `SentinelQuery` object is nested so it fails - 'nested object fails when `getSimpleName` is called'
           DBIO.failed(CaughtDBException(getClass.getName, dbException))
       }, keepFailure = false)(ec)
   }

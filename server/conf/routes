@@ -5,6 +5,11 @@
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 
-# API 엔드포인트를 컨트롤러에 매핑합니다
-# todo(simon): test api end point
-GET     /                             controllers.app.AppController.GET()
+# ITEMS
+GET     /                           controllers.app.AppController.GETIndex()
+GET     /api/items                  controllers.app.AppController.GETItemContentsHtml()
+GET     /api/item/:item_id          controllers.app.AppController.GETItem(item_id: Int)
+
+# USERS
+POST    /api/user                   controllers.app.AppController.POSTLogin()
+PATCH   /api/user/:user_id/rating   controllers.app.AppController.PATCHRating(user_id: Int)
